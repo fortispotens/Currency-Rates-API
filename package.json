@@ -1,6 +1,7 @@
 {
   "name": "currency-rates-api",
   "version": "1.0.0",
+  "type": "module",
   "description": "Simple currency rates converter API",
   "main": "index.js",
   "scripts": {
