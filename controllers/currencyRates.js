@@ -1,60 +1,69 @@
 import axios from 'axios';
+import {
+	getKeyValuePairsQueryParams,
+	getQueryParameters,
+	getRateBase,
+	convertArrayofObjectsToObject,
+	getConvertedRatesByBase,
+	convertArrayOfStringsToArrayOfObjects,
+	convertStringObjectValuesToNumber,
+} from '../utils/utils.js';
 
-const currencyRates = async (req, res) => {
-	const fetched = await axios.get('https://api.exchangeratesapi.io/latest');
+const currencyRates = async (request, response) => {
+	try {
+		// Fetch currency rates from Currency Rates API
+		const fetched = await axios.get('https://api.exchangeratesapi.io/latest');
 
-	const { rates } = fetched.data;
-	const { base, currency } = req.query;
+		// Destructure rates from fetched data
+		const { rates } = fetched.data;
 
-	const fetchedCurrencies = currency.split(',');
+		// Destructure user entries from request query
+		const { base, currency } = request.query;
 
-	fetchedCurrencies.push(base);
+		// Get Query Parameters
+		const fetchedCurrencies = getQueryParameters(base, currency);
 
-	let fetchedCurrencyValues = [];
-	fetchedCurrencies.forEach((key) => {
-		const value = rates[key];
-		fetchedCurrencyValues.push(`${key} : ${value}`);
-	});
+		// Get key value pairs of Query Parameters
+		const fetchedCurrencyValues = getKeyValuePairsQueryParams(
+			rates,
+			fetchedCurrencies
+		);
 
-	const splitfetchedCurrencyValues = (x) => {
-		const y = x.split(':');
-		return { [y[0].trim()]: y[1].trim() };
-	};
+		// Convert to array of objects
+		const fetchedFromStringValues = convertArrayOfStringsToArrayOfObjects(
+			fetchedCurrencyValues
+		);
 
-	const fetchedFromStringValues = fetchedCurrencyValues.map(
-		splitfetchedCurrencyValues
-	);
+		// Get Rate Base
+		const rateBase = getRateBase(fetchedFromStringValues);
 
-	const newBase = fetchedFromStringValues.pop();
+		// Convert Array of objects to objects
+		const fetchedRates = convertArrayofObjectsToObject(fetchedFromStringValues);
 
-	const newConvertedBase = Object.values(newBase)[0];
+		// Get the Converted rates by base
+		const newRates = getConvertedRatesByBase(fetchedRates, rateBase);
 
-	const fetchRates = Object.assign({}, ...fetchedFromStringValues);
+		// Convert new rates to Object
+		const newRatesArrayOfObjects = convertArrayOfStringsToArrayOfObjects(
+			newRates
+		);
 
-	const entries = Object.entries(fetchRates);
+		// Convert array of objects to Object
+		const newRatesObjects = convertArrayofObjectsToObject(
+			newRatesArrayOfObjects
+		);
 
-	const newRates = entries.map((entry) => {
-		return `${entry[0]} : ${Number(entry[1]) * Number(1 / newConvertedBase)}`;
-	});
+		// Convert string object values to number
+		convertStringObjectValuesToNumber(newRatesObjects);
 
-	const obj = newRates.map(splitfetchedCurrencyValues);
-
-	const convertedRates = Object.assign({}, ...obj);
-
-	Object.keys(convertedRates).forEach(function (el) {
-		convertedRates[el] = Number(Number(convertedRates[el]).toFixed(5));
-	});
-
-	console.log('>>>>>>', convertedRates);
-
-	const userResponse = {
-		base: base.toString(),
-		date: new Date().toLocaleDateString('en-GB'),
-		rates: convertedRates,
-	};
-	console.log('>>>>>>', userResponse);
-
-	res.send(userResponse);
+		response.status(200).json({
+			base: base.toString(),
+			date: new Date().toLocaleDateString('en-GB'),
+			rates: newRatesObjects,
+		});
+	} catch (error) {
+		response.status(500).json({ success: false, message: error.message });
+	}
 };
 
 export default currencyRates;
