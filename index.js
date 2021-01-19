@@ -10,7 +10,7 @@ app.use(cors());
 
 import currencyRatesRoutes from './routes/curencyRatesRoute.js';
 
-app.get('/', (req, res) => res.send('URL parametes challenge'));
+app.get('/', (req, res) => res.send('Welcome to Currency Rates API'));
 
 app.use('/api/rates', currencyRatesRoutes);
 

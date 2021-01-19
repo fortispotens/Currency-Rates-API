@@ -57,9 +57,11 @@ const currencyRates = async (request, response) => {
 		convertStringObjectValuesToNumber(newRatesObjects);
 
 		response.status(200).json({
-			base: base.toString(),
-			date: new Date().toLocaleDateString('en-GB'),
-			rates: newRatesObjects,
+			results: {
+				base: base.toString(),
+				date: new Date().toLocaleDateString('en-GB'),
+				rates: newRatesObjects,
+			},
 		});
 	} catch (error) {
 		response.status(500).json({ success: false, message: error.message });
