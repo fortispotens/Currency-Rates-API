@@ -8,7 +8,7 @@ Live URL: https://fortisnodeapi.herokuapp.com/
 
 Send a request to
 
-https://fortisnodeapi.herokuapp.com//api/rates?base=CZK&currency=EUR,GBP,USD
+https://fortisnodeapi.herokuapp.com/api/rates?base=CZK&currency=EUR,GBP,USD
 
 ## Expected Output
 
